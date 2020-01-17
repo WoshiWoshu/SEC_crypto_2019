@@ -1,0 +1,58 @@
+#!/bin/python3
+
+from Crypto.Cipher import AES
+import sys
+import base64
+from enum import Enum
+
+LENGTH = 16
+
+class Return(Enum):
+    SUCCESS = 0
+    ERROR = 84
+
+# read file content by it's path
+
+def readFileFromPath(filename):
+    try:
+        with open(filename) as f:
+            file_content = f.read()
+        if (file_content == ""):
+            raise NotImplementedError
+    except FileNotFoundError:
+        print("Error: File does not exist.")
+        sys.exit(Return.ERROR)
+    except NotImplementedError:
+        print("Error: Void file.")
+        sys.exit(Return.ERROR)
+    except PermissionError:
+        print("Error: Permission denied.")
+        sys.exit(Return.ERROR)
+    return (file_content)
+
+# The main class
+
+class CBC(object):
+    def __init__(self, filename):
+        self.file_content = readFileFromPath(filename)
+        self.vector, self.key, self.content = self.readFileElement()
+        self.rest = LENGTH - (len(self.content) % LENGTH)
+
+    def readFileElement(self):
+        line_list = self.file_content.splitlines()
+        return (bytes.fromhex(line_list[1]), bytes.fromhex(line_list[0]), base64.b64decode("".join(line_list[2:])))
+
+    def decode(self):
+        self.content += bytes(self.rest for i in range(self.rest))
+        lists = [self.content[idx:idx + LENGTH] for idx in range(0, len(self.content), LENGTH)]
+        text = AES.new(self.key, AES.MODE_ECB)
+        printer = b''.join(bytes(b ^ v for b, v in zip(text.decrypt(list), v)) for list, v in zip(lists, [self.vector] + lists))
+        print(base64.b64encode(printer[:-printer[-1]]).decode())
+
+if __name__ == "__main__":
+    try:
+        cbc = CBC(sys.argv[1])
+        cbc.decode()
+        sys.exit(0)
+    except:
+        sys.exit(84)

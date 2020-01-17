@@ -1,0 +1,56 @@
+#!/bin/python3
+
+import sys
+import binascii
+
+def give_score(message):
+    list_message = []
+    for letter in message:
+        if (letter.isalpha() and ord(letter.lower()) in range(97, 123)):
+            list_message.append(letter)
+        else:
+            continue
+    message = "".join(list_message)
+    letter_frequency = {
+        'a': .08167, 'b': .01492, 'c': .02782, 'd': .04253,
+        'e': .12702, 'f': .02228, 'g': .02015, 'h': .06094,
+        'i': .06094, 'j': .00153, 'k': .00772, 'l': .04025,
+        'm': .02406, 'n': .06749, 'o': .07507, 'p': .01929,
+        'q': .00095, 'r': .05987, 's': .06327, 't': .09056,
+        'u': .02758, 'v': .00978, 'w': .02360, 'x': .00150,
+        'y': .01974, 'z': .00074,
+    }
+    return sum([letter_frequency[letter] for letter in message.lower()])
+
+def xor_cipher(argv):
+    try:
+        with open(argv[1]) as f:
+            file_content = f.read()
+            if (file_content == ""):
+                raise FileNotFoundError
+            file_content = bytes.fromhex(file_content)
+    except FileNotFoundError:
+        print("Error: file not found.")
+        exit(84)
+    except ValueError:
+        print("Error: file contains a non hexadecimal element.")
+        exit(84)
+    except PermissionError:
+        print("Error: file permission denied.")
+        return (84)
+    key_score = {}
+    for byte in range(256):
+        curr = ""
+        for element in file_content:
+            curr += chr(byte ^ element)
+        key_score[byte] = give_score(curr)
+    res = max(key_score, key=key_score.get)
+    res1 = '{:02x}'.format(res)
+    print(res1)
+if __name__ == "__main__":
+    argv = sys.argv
+    argc = len(argv)
+    if (argc == 2):
+        sys.exit(xor_cipher(argv))
+    else:
+        sys.exit(84)

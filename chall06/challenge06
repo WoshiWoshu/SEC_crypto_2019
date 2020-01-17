@@ -1,0 +1,86 @@
+#!/bin/python3
+
+# hammingDistance is a function takes 2 arguments and compare them by bytes to get the hamming distance
+# set by default that first_list is the original key and the second_list contains the key value
+
+def hammingDistance(first_list, second_list):
+    distance = 0
+    try:
+        for first, second in zip(first_list, second_list):
+            if (type(first) == str):
+                first = ord(first)
+            if (type(second) == str):
+                second = ord(second)
+            bin_distance = first ^ second
+            distance += bin(bin_distance).count("1")
+    except IndexError:
+        return (0)
+    return (distance)
+
+# BlockGetor let us get the keysize and the devided block by the filename
+
+class BlockGetor(object):
+    def __init__(self, filename):
+        self.keyrange = range(5, 41)
+        self.letter_frequency = { ' ': 0.14644517248590286, '"': 0.007231090386795464, "'": 0.002938662303309572, '(': 0.003074405755522374, ')': 0.003074405755522374,',': 0.013592688931038658, '-': 0.0019811206539165653, '.': 0.01758061143253367,'0': 0.01125570030780745, '1': 0.012532422506998125, '2': 0.011457481115150804,'3': 0.002890968657937507, '4': 0.002549775656429654, '5': 0.003224824175541965,'6': 0.004197040792741761, '7': 0.0038375040814754213, '8': 0.0036247170482769753,'9': 0.003078074497474071, ':': 0.0011373100050261764, ';': 0.0006823860030157058,'?': 0.00017609961368147248, 'A': 0.0044868714069258514,'B': 0.0024066947203134573, 'C': 0.004057628598577262, 'D': 0.003606373338518489,'E': 0.0014564905548238455, 'F': 0.0025974693018017193, 'G': 0.0010749413918473216,'H': 0.0022452700744387743, 'I': 0.002766231431579797, 'J': 0.00305239330381219,'K': 0.0007080671966775872, 'L': 0.0016802838138773833, 'M': 0.003727441822924501,'N': 0.003547673467291331, 'O': 0.0015995714909400418, 'P': 0.0033275489501894905,'Q': 0.0001614246458746831, 'R': 0.00421171576054855, 'S': 0.004395152858133418,'T': 0.0096671350427225, 'U': 0.0013611032640797145, 'V': 0.00047693645372065465,'W': 0.0020801766866123937, 'X': 5.8699871227157497e-05, 'Y': 0.001067603907943927,'Z': 7.337483903394687e-05,'a': 0.05526592876036878, 'b': 0.008467456424517468, 'c': 0.019825881506972443,'d': 0.026495654375158214, 'e': 0.08536795647404548, 'f': 0.01142079369563383,'g': 0.012007792407905405, 'h': 0.024316421655849994, 'i': 0.05229057903754224,'j': 0.000598004938126667, 'k': 0.004376809148374931, 'l': 0.02862719344909437,'m': 0.020655017188056044, 'n': 0.04970778470354731, 'o': 0.0455731125239844,'p': 0.017382499367142014, 'q': 0.00035586796931464233, 'r': 0.0512303126135017,'s': 0.040965172632652536, 't': 0.05213649187557095, 'u': 0.022914962230301608,'v': 0.00887835552310757, 'w': 0.008746280812846468, 'x': 0.0016105777167951339,'y': 0.010811782531652072, 'z': 0.0007851107776632315 }
+        try:
+            with open(filename) as f:
+                self.file = f.read()
+                if (self.file == ""):
+                    raise ValueError
+                self.file = bytes.fromhex(self.file)
+        except FileNotFoundError:
+            print("Error: File does not exist.")
+            exit(84)
+        except ValueError:
+            print("Error: Void file.")
+            exit(84)
+        except PermissionError:
+            print("Error: Permission denied")
+            exit(84)
+        self.keysize = self.findKey()
+
+    def chunkList(self):
+        text_len = len(self.file)
+        return ([self.file[i:i+self.keysize] for i in range(0, text_len, self.keysize)])
+
+    def findKey(self):
+        key_2_distance = {}
+        for key in self.keyrange:
+            try:
+                instent_text = self.file[:key * 2]
+                instent_list = self.file[key * 2:key * 4]
+                key_2_distance[key] = hammingDistance(instent_text, instent_list) / key
+            except IndexError:
+                pass
+        return (sorted(key_2_distance, key=key_2_distance.get)[:2])
+
+    def getBlock(self):
+        scores = []
+        for keysize in self.keysize:
+            keys = [] # list of dictionary contains the 256 dic
+            for i in range(keysize):
+                key_2_score = {} # 0 - 255 dict with sum of the corresponding value
+                text = self.file[i::keysize]
+                for k in range(256):
+                    xored = map(lambda b: chr(b ^ k), text)
+                    xored = [element for element in xored if element in self.letter_frequency]
+                    summed = sum(self.letter_frequency[target] for target in xored)
+                    key_2_score[k] = summed
+                keys.append(key_2_score)
+            key = bytes([max(total, key=total.get) for total in keys])
+            transposed = list(map(lambda x: chr(x[1] ^ key[x[0] % len(key)]), enumerate(self.file)))
+            score = sum(self.letter_frequency[element] for element in transposed if element in self.letter_frequency)
+            scores.append((key, score))
+        key = sorted(scores, key=lambda x: (x[1], 1 / len(x[0])))[-1][0]
+        print(key.hex().upper())
+        return (0)
+
+if __name__ == "__main__":
+    import sys
+    try:
+        block = BlockGetor(sys.argv[1])
+    except:
+        print("Error: to few arguments.")
+        exit(84)
+    sys.exit(block.getBlock())

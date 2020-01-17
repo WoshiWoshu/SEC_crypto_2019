@@ -1,0 +1,37 @@
+#!/bin/python3
+
+import binascii
+import codecs
+import sys
+
+def hexToXorStr(hexStrA, hexStrB):
+    xorStr = b''
+
+    for b1, b2 in zip(hexStrA, hexStrB):
+        xorStr += bytes([b1 ^ b2])
+    return xorStr
+
+def parseConvertInputs(av):
+    hexStr = [0] * 2
+
+    try:
+        with open(av[1]) as f:
+            for i, line in enumerate(f):
+                if (i > 1):
+                    return (84)
+                hexStr[i] = line.strip()
+    except FileNotFoundError:
+        print("Error: file not found.")
+        return (84)
+    if (len(hexStr[0]) != len(hexStr[1])):
+        exit(84)
+    hexStrA = bytes.fromhex(hexStr[0])
+    hexStrB = bytes.fromhex(hexStr[1])
+    print(hexToXorStr(hexStrA, hexStrB).hex().upper())
+    return (0);
+
+if __name__ == '__main__':
+    if (len(sys.argv) == 2):
+        exit(parseConvertInputs(sys.argv))
+    else:
+        exit(84)

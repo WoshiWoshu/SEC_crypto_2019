@@ -1,0 +1,20 @@
+#!/bin/python3
+import sys
+import base64
+
+if __name__ == "__main__":
+    argv = sys.argv
+    if (len(argv) == 2):
+        try:
+            with open(argv[1]) as f:
+                content = f.read()
+                if (content == ""):
+                    raise NotImplementedError
+                enc = base64.b64encode(bytes.fromhex(content)).decode("utf-8")
+                print(enc)
+        except:
+            exit(84)
+        exit(0)
+    else:
+        print ("FUCK OFF")
+        exit(84)

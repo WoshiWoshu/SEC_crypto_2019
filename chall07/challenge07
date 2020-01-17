@@ -1,0 +1,30 @@
+#!/bin/python3
+
+import base64
+import sys
+
+from Crypto.Cipher import AES
+
+def decrpyt_ecb_aes(text_param, key):
+    text = AES.new(key, AES.MODE_ECB)
+    return (text.decrypt(text_param))
+
+def aes_in_ecb(av):
+    try:
+        with open(av[1]) as f:
+            key = bytes.fromhex(f.readline())
+            text = base64.b64decode(f.read().strip())
+            printer = decrpyt_ecb_aes(text, key)
+            target = base64.b64encode(printer[:-printer[-1]]).decode()
+            print(target)
+    except:
+        print("Error: file not found.")
+        return (84)
+
+if __name__ == '__main__':
+    argv = sys.argv
+    argc = len(argv)
+    if (argc == 2):
+        sys.exit(aes_in_ecb(argv))
+    else:
+        sys.exit(84)

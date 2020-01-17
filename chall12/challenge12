@@ -1,0 +1,15 @@
+#!/bin/python3
+
+import urllib.request
+import base64
+import sys
+
+if __name__ == "__main__":
+    quest = urllib.request.Request("http://127.0.0.1:5000/challenge12", data=base64.b64encode(b""))
+    try:
+        req = urllib.request.urlopen(quest)
+        if (base64.b64decode(req).read() == ""):
+            raise NotImplementedError
+    except:
+        print("Error")
+        exit(84)

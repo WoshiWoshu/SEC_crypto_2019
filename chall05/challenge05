@@ -1,0 +1,50 @@
+#!/bin/python3
+
+import sys
+
+def parse_file(text):
+    line_list = []
+    for line in text.splitlines():
+        line_list.append(line)
+    try:
+        return (line_list[0], "".join(line_list[1:]))
+    except:
+        exit(84)
+
+def repeat_xor(filename):
+    try:
+        with open(filename) as f:
+            file_content = f.read()
+            if (file_content == ""):
+                raise NotImplementedError
+    except FileNotFoundError:
+        print("Error: file not found.")
+        return (84)
+    except NotImplementedError:
+        return (84)
+    except PermissionError:
+        return (84)
+    except:
+        return (84)
+    key, sentence = parse_file(file_content)
+    if (key == "" or sentence == ""):
+        exit(84)
+    try:
+        key = key * (int(len(sentence) / len(key)) + 1)
+    except:
+        return (84)
+
+    encrypted = []
+    for cle, letter in zip(key, sentence):
+        encrypted.append(hex(int(cle, 16) ^ int(letter, 16))[2:].upper())
+    print("".join(encrypted))
+
+    return (0)
+
+if __name__ == "__main__":
+    argv = sys.argv
+    argc = len(sys.argv)
+    if (argc == 2):
+        sys.exit(repeat_xor(argv[1]))
+    else:
+        sys.exit(84)
