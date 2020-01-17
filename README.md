@@ -9,7 +9,7 @@ python3, pycrypto v2.6.1 and requests v2.22.0 must be installed.
 
 USAGE :
 
-./challengeXX [input.txt]
+./challengeXX [input.txt].
 
 NOTE:
 
