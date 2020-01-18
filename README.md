@@ -5,12 +5,12 @@ Python uses the Crypto module + crypto primitive of the AES encryption/decryptio
 
 PREREQUISITES :
 
-python3, pycrypto v2.6.1 and requests v2.22.0 must be installed.
+    python3, pycrypto v2.6.1 and requests v2.22.0 must be installed.
 
 USAGE :
 
-./challengeXX [input.txt].
+    ./challengeXX [input.txt].
 
 NOTE:
 
-You might want to change the Shebang (at the top of the files) to "#!/usr/local/bin/python3" for macos.
+    You might want to change the Shebang (at the top of the files) to "#!/usr/local/bin/python3" for macos.
